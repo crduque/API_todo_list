@@ -36,12 +36,14 @@ def handle_hello(user_route):
     user_content = username
     return jsonify(user_content), 200
 
+# CREATE USER
 @app.route("/todos/user/<user_route>", methods=["POST"])
 def create_user(user_route):
     new_user = User(username=user_route)
     new_user.add_user()
     return jsonify(new_user.serialize()), 201
 
+# CREATE TASK
 @app.route("/todos/user/<user_route>/list", methods=["POST"])
 def create_task(user_route):
     body = request.get_json()
@@ -49,18 +51,24 @@ def create_task(user_route):
     new_task.add_task()
     return jsonify(new_task.serialize())
 
-# @app.route("/todos/user/<user_route>/list/<int:task_id>", methods=["PUT"])
-# def update_task(user_route, task_id):
-#     body = request.get_json()
-#     updated_task = Tasks(id=body["task_id"], user_name=user_route, task_text=body["task_text"], task_done=body["task_done"])
-#     updated_task.update_task(task_id)
-#     return jsonify(updated_task.serialize())
+# READ ALL TASKS
+@app.route("/todos/user/<user_route>/list", methods=["GET"])
+def read_all_tasks(user_route):
+    todo_list = Tasks.get_all_tasks(user_route)
+    return jsonify(todo_list)
 
-@app.route("/todos/user/<user_route>", methods=["DELETE"])
-def delete_user(user_route):
-    user_to_delete = User(username=user_route)
-    user_to_delete.delete_user()
-    return "User deleted", 200
+# UPDATE ONE TASK
+@app.route("/todos/user/<user_route>/list", methods=["PUT"])
+def update_task(user_route):
+    body = request.get_json()
+    updated_task = Tasks(user_name=user_route, id=body["id"], task_text=body["task_text"], task_done=body["task_done"])
+    updated_task.update_task(user_route, body["id"], body["task_text"], body["task_done"])
+    return jsonify(updated_task.serialize())
+
+# # DELETE USER AND ITS TASKS
+# @app.route("/todos/user/<user_route>", methods=["DELETE"])
+# def delete_user(user_route):
+#     pass
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':

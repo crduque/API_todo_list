@@ -16,21 +16,21 @@ class User(db.Model):
         return {
             "id": self.id,
             "username": self.username,
-            "tasks": self.tasks_relationship
         }
+    
+    @classmethod
+    def get_user(cls, username):
+        user = User.query.filter_by(username = username).first() # devuelve el primero que encuentra
+        return user.serialize()
 
     def add_user(self):
         db.session.add(self)
         db.session.commit()
 
-    def delete_user(self):
-        db.session.remove(self)
-        db.session.commit()
-
-    @classmethod
-    def get_user(cls, username):
-        user = User.query.filter_by(username = username).first() # devuelve el primero que encuentra
-        return user.serialize()
+    # def delete_user(username):
+    #     user = User.query.filter_by(username = username).first()
+    #     db.session.remove(user)
+    #     db.session.commit()
 
 class Tasks(db.Model):
     __tablename__ = "task"
@@ -54,7 +54,15 @@ class Tasks(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    # def update_task(self, new_done):
-    #     task = Tasks.query.get(self)
-    #     task.task_done = new_done
-    #     db.session.commit()
+    @classmethod
+    def get_all_tasks(cls, username):
+        tasks = Tasks.query.filter_by(user_name = username)
+        all_tasks = list(map(lambda x: x.serialize(), tasks))
+        return all_tasks
+
+    def update_task(self, username, task_id, task_text, task_done):
+        task = Tasks.query.filter_by(user_name = username, id=task_id).first()
+        task.task_text = task_text
+        task.task_done = task_done
+        db.session.commit()
+        return task
