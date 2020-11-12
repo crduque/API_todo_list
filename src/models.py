@@ -19,18 +19,27 @@ class User(db.Model):
         }
     
     @classmethod
+    def get_all_users(cls):
+        all_users = User.query.all()
+        users = list(map(lambda x: x.serialize(), all_users))
+        return users
+        
+    @classmethod
     def get_user(cls, username):
         user = User.query.filter_by(username = username).first() # devuelve el primero que encuentra
         return user.serialize()
+
 
     def add_user(self):
         db.session.add(self)
         db.session.commit()
 
-    # def delete_user(username):
-    #     user = User.query.filter_by(username = username).first()
-    #     db.session.remove(user)
-    #     db.session.commit()
+    def delete_user(username):
+        Tasks.delete_all_tasks(username)
+        user = User.query.filter_by(username = username)
+        user.delete()
+        db.session.commit()
+        return username
 
 class Tasks(db.Model):
     __tablename__ = "task"
@@ -66,3 +75,8 @@ class Tasks(db.Model):
         task.task_done = task_done
         db.session.commit()
         return task
+
+    def delete_all_tasks (username):
+        tasks = Tasks.query.filter_by(user_name = username)
+        tasks.delete()
+        db.session.commit()

@@ -30,8 +30,15 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+# READ ALL USERS
+@app.route("/todos/user", methods=["GET"])
+def read_all_users():
+    all_users = User.get_all_users()
+    return jsonify(all_users), 200
+
+# READ USER
 @app.route('/todos/user/<user_route>', methods=['GET'])
-def handle_hello(user_route):
+def read_user(user_route):
     username = User.get_user(user_route)
     user_content = username
     return jsonify(user_content), 200
@@ -65,10 +72,11 @@ def update_task(user_route):
     updated_task.update_task(user_route, body["id"], body["task_text"], body["task_done"])
     return jsonify(updated_task.serialize())
 
-# # DELETE USER AND ITS TASKS
-# @app.route("/todos/user/<user_route>", methods=["DELETE"])
-# def delete_user(user_route):
-#     pass
+# DELETE USER AND ITS TASKS
+@app.route("/todos/user/<user_route>", methods=["DELETE"])
+def delete_user(user_route):
+    user_to_delete = User.delete_user(user_route)
+    return "User deleted"
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
